@@ -1,6 +1,5 @@
 import mechcontrols.messageDigest
 import modules.zmqHeader as zmqHeader
-import mechcontrols.pwmConfig
 
 zmqObj = zmqHeader.ZMQ_CONNECTION(
     TX_ID="fake_worker_1",
