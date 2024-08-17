@@ -9,5 +9,5 @@ zmqObj = zmqHeader.ZMQ_CONNECTION(
 )
 
 print(zmqObj.connectZMQ())
-zmqObj.startListenThread()
+print(zmqObj.startListenThread())
 
