@@ -9,20 +9,19 @@ pwm_steering = PWMOutputDevice(12)  # PWM pin for steering control
 
 def messageHandler(message):
     try:
-        while True:
-            if isinstance(message, str):
-                message = json.loads(message)
+        if isinstance(message, str):
+            message = json.loads(message)
 
-            print(message)
+        print(message)
 
-            command = str(message["msg_name"])
-            val = str(message["content"])
+        command = str(message["msg_name"])
+        val = str(message["content"])
 
-            print(command,val)
-            if command == "power":
-                set_power(val)
-            elif command == "steering":
-                set_steering_pwm(val)
+        print(command,val)
+        if command == "power":
+            set_power(val)
+        elif command == "steering":
+            set_steering_pwm(val)
 
     except KeyboardInterrupt:
         print("Stopping motor and cleaning up GPIO")
