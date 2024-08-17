@@ -1,7 +1,3 @@
-# Define function to set steering PWM correctly
-from gpiozero import OutputDevice, PWMOutputDevice
-
-pwm_steering = PWMOutputDevice(12)  # PWM pin for steering control
 def set_steering_pwm(value):
     """Set steering PWM value within the range of 0.0 to 1.0."""
     try:
