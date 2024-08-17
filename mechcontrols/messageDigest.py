@@ -20,7 +20,7 @@ def messageHandler(message):
                     message = message
                     pass
             print(message)
-            message = json.loads(message)
+            #message = json.loads(message)
             command = message['msg_name']
             val = message['content']
 
