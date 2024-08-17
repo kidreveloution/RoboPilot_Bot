@@ -1,6 +1,6 @@
 import mechcontrols.messageDigest
 import modules.zmqHeader as zmqHeader
-
+import modules.messageBuilder as messageBuilder
 zmqObj = zmqHeader.ZMQ_CONNECTION(
     TX_ID="fake_worker_1",
     RX_ID="ROUTER",

@@ -5,7 +5,7 @@ import logging
 import requests
 import json
 import threading
-import messageBuilder as messageBuilder
+import modules.messageBuilder as messageBuilder
 
 class ZMQ_CONNECTION:
     def __init__(self, TX_ID: str, RX_ID: str, SERVER_IP: str, message_handler=None) -> None:
