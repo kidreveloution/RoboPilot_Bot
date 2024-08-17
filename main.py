@@ -3,7 +3,6 @@ import modules.zmqHeader as zmqHeader
 import mechcontrols
 import mechcontrols.PWM
 
-mechcontrols.PWM.initiate_pwm()
 
 
 zmqObj = zmqHeader.ZMQ_CONNECTION(
