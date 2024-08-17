@@ -5,6 +5,7 @@ def set_power(val):
     if val > 0:
         # Reverse
         MotorController.power_pin_forward.off()
+        MotorController.power_pin_forward
         MotorController.power_pin_reverse.on()
         MotorController.pwm_power.value = abs(val) / 100
     elif val < 0:
