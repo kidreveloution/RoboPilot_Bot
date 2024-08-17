@@ -11,11 +11,12 @@ print (power_pin_forward,power_pin_reverse,pwm_power,pwm_steering)
 def messageHandler(message):
     try:
         while True:
+            message = json.loads(message)
+
             print(message)
             print(type(message))
             print(message[0])
             print(message['msg_name'])
-            #message = json.loads(str(message))
             command = message['msg_name']
             val = message['content']
 
