@@ -26,7 +26,7 @@ class ZMQ_CONNECTION:
             response.raise_for_status()  # Raises an error for bad responses
             return response.text
         except requests.RequestException as e:
-            logging.error(f"Failed to get public IP: {e}")
+            print(f"Failed to get public IP: {e}")
             return "0.0.0.0"  # Return a default IP if the request fails
     
     def connectZMQ(self) -> bool:
@@ -36,10 +36,10 @@ class ZMQ_CONNECTION:
             self.dealer.connect(self.SERVER_IP)
             registration_message = self.registerAtRouter()
             self.dealer.send_multipart([self.TX_ID.encode('utf-8'), registration_message.encode('utf-8')])
-            logging.info("Connected and registration message sent.")
+            print("Connected and registration message sent.")
             return True
         except Exception as e:
-            logging.error(f"Failed to connect or send registration: {e}")
+            print(f"Failed to connect or send registration: {e}")
             return False
     
     def registerAtRouter(self) -> str:
@@ -52,7 +52,7 @@ class ZMQ_CONNECTION:
             ).buildMessage()
             return initial_message
         except Exception as e:
-            logging.error(f"Failed to build registration message: {e}")
+            print(f"Failed to build registration message: {e}")
             return ""
 
     def listen(self):
@@ -66,7 +66,7 @@ class ZMQ_CONNECTION:
                     if self.message_handler:
                         self.message_handler(message[0].decode('utf-8'))  # Call the external handler
         except Exception as e:
-            logging.error(f"Error while listening: {e}")
+            print(f"Error while listening: {e}")
     
     def sendMessage(self, RX_ID, msg_name, content):
         if isinstance(content, str):
@@ -94,4 +94,4 @@ class ZMQ_CONNECTION:
         if self.dealer:
             self.dealer.close()
         self.context.term()
-        logging.info("ZMQ connection closed.")
+        print("ZMQ connection closed.")

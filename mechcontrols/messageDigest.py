@@ -43,7 +43,6 @@ def messageHandler(message):
         power_pin_forward.close()
         power_pin_reverse.close()
 
-
 def set_power(val):
     val = float(val)
     if val > 0:
