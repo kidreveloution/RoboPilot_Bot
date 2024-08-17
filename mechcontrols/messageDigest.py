@@ -11,7 +11,9 @@ print (power_pin_forward,power_pin_reverse,pwm_power,pwm_steering)
 def messageHandler(message):
     try:
         while True:
-            message = json.loads(message)
+            # If the message is a string, parse it as JSON
+            if isinstance(message, str):
+                message = json.loads(message)
 
             print(message)
 
