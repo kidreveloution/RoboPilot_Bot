@@ -16,8 +16,8 @@ def messageHandler(message):
             print(message)
             print(type(message))
             print(message["msg_name"])
-            command = message["msg_name"]
-            val = message["content"]
+            command = str(message["msg_name"])
+            val = str(message["content"])
 
             print(command,val)
             if command == "power":
