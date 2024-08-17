@@ -1,6 +1,4 @@
 import json
-from mechcontrols.steering import set_steering_pwm
-from mechcontrols.power import set_power
 
 from gpiozero import OutputDevice, PWMOutputDevice
 
@@ -44,3 +42,34 @@ def messageHandler(message):
         pwm_steering.close()
         power_pin_forward.close()
         power_pin_reverse.close()
+
+
+def set_power(val):
+    val = float(val)
+    if val > 0:
+        # Reverse
+        power_pin_forward.off()
+        power_pin_forward
+        power_pin_reverse.on()
+        pwm_power.value = abs(val) / 100
+    elif val < 0:
+        # Forward
+        power_pin_forward.on()
+        power_pin_reverse.off()
+        pwm_power.value = abs(val) / 100
+    else:
+        # Stop
+        power_pin_forward.off()
+        power_pin_reverse.off()
+        pwm_power.value = 0
+
+def set_steering_pwm(value):
+    try:
+        value = float(value)
+        if 0.0 <= value <= 1.0:            
+            pwm_steering.value = value
+            print(f"Steering PWM value set to: {value:.2f}")
+        else:
+            print("Steering value out of range. Please enter a number between 0>")
+    except ValueError:
+        print("Please enter a valid floating-point number for steering.")
