@@ -32,17 +32,17 @@ def messageHandler(message):
 
     except KeyboardInterrupt:
         print("Stopping motor and cleaning up GPIO")
-        pwm_power.close()
-        pwm_steering.close()
-        power_pin_forward.close()
-        power_pin_reverse.close()
+        # pwm_power.close()
+        # pwm_steering.close()
+        # power_pin_forward.close()
+        # power_pin_reverse.close()
 
     except Exception as e:
         print("An error occurred:", str(e))
-        pwm_power.close()
-        pwm_steering.close()
-        power_pin_forward.close()
-        power_pin_reverse.close()
+        # pwm_power.close()
+        # pwm_steering.close()
+        # power_pin_forward.close()
+        # power_pin_reverse.close()
 
 def set_power(val):
     val = float(val)
