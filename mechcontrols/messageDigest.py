@@ -1,6 +1,6 @@
 import json
-from steering import set_steering_pwm
-from power import set_power
+from mechcontrols.steering import set_steering_pwm
+from mechcontrols.power import set_power
 from mechcontrols.PWM import power_pin_forward, power_pin_reverse, pwm_power, pwm_steering
 
 def messageHandler(message):
