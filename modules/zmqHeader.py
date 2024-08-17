@@ -65,6 +65,8 @@ class ZMQ_CONNECTION:
                     print(f"Received message: {message}")
                     if self.message_handler:
                         self.message_handler(message[0].decode('utf-8'))  # Call the external handler
+                        print(f"Sent to external Handler: {message[0].decode('utf-8')}")
+
         except Exception as e:
             print(f"Error while listening: {e}")
     
