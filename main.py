@@ -1,6 +1,10 @@
 import mechcontrols.messageDigest
 import modules.zmqHeader as zmqHeader
 import mechcontrols
+import mechcontrols.PWM
+
+mechcontrols.PWM.initiate_pwm()
+
 
 zmqObj = zmqHeader.ZMQ_CONNECTION(
     TX_ID="fake_worker_1",
@@ -11,3 +15,4 @@ zmqObj = zmqHeader.ZMQ_CONNECTION(
 
 zmqObj.connectZMQ()
 zmqObj.startListenThread()
+
