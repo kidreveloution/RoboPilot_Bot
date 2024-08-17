@@ -10,8 +10,8 @@ pwm_steering = PWMOutputDevice(12)  # PWM pin for steering control
 def messageHandler(message):
     try:
         while True:
-            
-            message = json.loads(message)
+            if isinstance(message, str):
+                message = json.loads(message)
 
             print(message)
 
