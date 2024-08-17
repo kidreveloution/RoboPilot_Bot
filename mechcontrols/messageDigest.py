@@ -9,7 +9,11 @@ def messageHandler(message):
             if isinstance(message, list) and len(message) > 0 and isinstance(message[0], bytes):
                 message = message[0].decode('utf-8')
             else:
-                message = message.decode('utf-8')
+                try:
+                    message = message.decode('utf-8')
+                except:
+                    message = message
+                    pass
         
             message = json.loads(message)
             command = message['msg_name']
