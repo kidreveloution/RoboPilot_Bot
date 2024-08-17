@@ -1,4 +1,3 @@
-import mechcontrols.pwmConfig
 # Define function to set steering PWM correctly
 from gpiozero import OutputDevice, PWMOutputDevice
 

@@ -1,7 +1,14 @@
 import json
 from mechcontrols.steering import set_steering_pwm
 from mechcontrols.power import set_power
-import mechcontrols.pwmConfig
+
+from gpiozero import OutputDevice, PWMOutputDevice
+
+power_pin_forward = OutputDevice(17, initial_value=False)  # Direction pin 1 for forward
+power_pin_reverse = OutputDevice(27, initial_value=False)  # Direction pin 2 for reverse
+pwm_power = PWMOutputDevice(18, frequency=1000, initial_value=0)  # PWM pin for power control
+pwm_steering = PWMOutputDevice(12)  # PWM pin for steering control
+
 def messageHandler(message):
     try:
         while True:
@@ -26,14 +33,14 @@ def messageHandler(message):
 
     except KeyboardInterrupt:
         print("Stopping motor and cleaning up GPIO")
-        mechcontrols.pwmConfig.pwm_power.close()
-        mechcontrols.pwmConfig.pwm_steering.close()
-        mechcontrols.pwmConfig.power_pin_forward.close()
-        mechcontrols.pwmConfig.power_pin_reverse.close()
+        pwm_power.close()
+        pwm_steering.close()
+        power_pin_forward.close()
+        power_pin_reverse.close()
 
     except Exception as e:
         print("An error occurred:", str(e))
-        mechcontrols.pwmConfig.pwm_power.close()
-        mechcontrols.pwmConfig.pwm_steering.close()
-        mechcontrols.pwmConfig.power_pin_forward.close()
-        mechcontrols.pwmConfig.power_pin_reverse.close()
+        pwm_power.close()
+        pwm_steering.close()
+        power_pin_forward.close()
+        power_pin_reverse.close()
