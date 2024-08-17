@@ -19,8 +19,7 @@ def messageHandler(message):
                 except:
                     message = message
                     pass
-            print(message)
-            #message = json.loads(message)
+            message = json.loads(str(message))
             command = message['msg_name']
             val = message['content']
 
