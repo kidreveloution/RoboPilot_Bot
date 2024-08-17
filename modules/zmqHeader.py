@@ -62,7 +62,7 @@ class ZMQ_CONNECTION:
                 # Wait for incoming messages
                 message = self.dealer.recv_multipart()
                 if message:
-                    logging.info(f"Received message: {message}")
+                    print(f"Received message: {message}")
                     if self.message_handler:
                         self.message_handler(message[0].decode('utf-8'))  # Call the external handler
         except Exception as e:
