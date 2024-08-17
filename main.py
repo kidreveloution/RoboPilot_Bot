@@ -3,7 +3,7 @@ import modules.zmqHeader as zmqHeader
 import mechcontrols
 import mechcontrols.PWM
 
-
+mechcontrols.PWM.MotorController.initialize()
 
 zmqObj = zmqHeader.ZMQ_CONNECTION(
     TX_ID="fake_worker_1",
