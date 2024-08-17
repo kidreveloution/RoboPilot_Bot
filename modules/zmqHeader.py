@@ -46,7 +46,7 @@ class ZMQ_CONNECTION:
         try:
             initial_message = messageBuilder.MESSAGE_CLASS(
                 tx_id=self.TX_ID,
-                msg_name="registeration",
+                msg_name="register",
                 rx_id=self.RX_ID,
                 content={"ip_address": self.get_public_ip()}
             ).buildMessage()
