@@ -14,8 +14,7 @@ def messageHandler(message):
             message = json.loads(message)
 
             print(message)
-            print(type(message))
-            print(message["msg_name"])
+
             command = str(message["msg_name"])
             val = str(message["content"])
 
