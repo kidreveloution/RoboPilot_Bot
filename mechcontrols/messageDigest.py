@@ -12,17 +12,10 @@ def messageHandler(message):
     try:
         while True:
             print(message)
-            if isinstance(message, list) and len(message) > 0 and isinstance(message[0], bytes):
-                message = message[0].decode('utf-8')
-            else:
-                try:
-                    message = message.decode('utf-8')
-                except:
-                    message = message
-                    pass
-            print(message)
-
-            message = json.loads(str(message))
+            print(type(message))
+            print(message[0])
+            print(message['msg_name'])
+            #message = json.loads(str(message))
             command = message['msg_name']
             val = message['content']
 
