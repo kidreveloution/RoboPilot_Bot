@@ -7,8 +7,8 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import common.messageBuilder as messageBuilder
-import common.zmqHeader as zmqHeader
+import modules.messageBuilder as messageBuilder
+import modules.zmqHeader as zmqHeader
 
 def printIncoming(msg):
     print(msg)
