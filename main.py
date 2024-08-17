@@ -8,6 +8,6 @@ zmqObj = zmqHeader.ZMQ_CONNECTION(
     message_handler=mechcontrols.messageDigest.messageHandler,
 )
 
-zmqObj.connectZMQ()
+print(zmqObj.connectZMQ())
 zmqObj.startListenThread()
 
