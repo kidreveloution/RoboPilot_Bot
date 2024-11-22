@@ -1,21 +1,24 @@
 import io
 from picamera import PiCamera
 from flask import Flask, Response
+from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 
 def generate_frames():
     with PiCamera() as camera:
-        camera.resolution = (640, 480)
-        camera.framerate = 24
+        # Lower resolution and moderate frame rate for minimal lag
+        camera.resolution = (320, 240)  # Lower resolution reduces bandwidth
+        camera.framerate = 30  # Higher framerate for smoother video
         stream = io.BytesIO()
 
         # Continuous frame capture
         for _ in camera.capture_continuous(stream, format='jpeg', use_video_port=True):
             stream.seek(0)
             # Yield each frame as a multipart HTTP response
+            frame = stream.read()
             yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + stream.read() + b'\r\n')
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
             stream.seek(0)
             stream.truncate()
 
@@ -24,4 +27,6 @@ def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, threaded=True)
+    # Use gevent WSGI server for better performance
+    http_server = WSGIServer(('0.0.0.0', 5000), app)
+    http_server.serve_forever()
