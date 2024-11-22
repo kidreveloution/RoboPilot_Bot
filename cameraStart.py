@@ -1,11 +1,11 @@
 import io
-from picamera import Picamera
+from picamera import PiCamera
 from flask import Flask, Response
 
 app = Flask(__name__)
 
 def generate_frames():
-    with Picamera.PiCamera() as camera:
+    with PiCamera.PiCamera() as camera:
         camera.resolution = (640,480)
         camera.framerate = 24
         stream = io.BytesIO()
