@@ -172,10 +172,9 @@ class ZMQ_CONNECTION:
             self.dealer.close()
         self.context.term()
         print("ZMQ connection closed.")
-import modules.zmqHeader as zmqHeader
 
 # Create the ZeroMQ connection object
-zmqObj = zmqHeader.ZMQ_CONNECTION(
+zmqObj = ZMQ_CONNECTION(
     TX_ID="RoboCar_1",
     RX_ID="ROUTER",
     SERVER_IP="tcp://3.22.90.156:5555",
@@ -183,7 +182,7 @@ zmqObj = zmqHeader.ZMQ_CONNECTION(
 )
 
 try:
-    motor_control = MotorControl()  # Initialize the motor control
+    #motor_control = MotorControl()  # Initialize the motor control
 
     # Connect to the ZeroMQ server
     print(zmqObj.connectZMQ())
