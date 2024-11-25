@@ -9,13 +9,24 @@ import modules.messageBuilder as messageBuilder
 # Motor Control Class
 class MotorControl:
     def __init__(self):
-        # GPIO pin setup
-        self.power_pin_forward = OutputDevice(17, initial_value=False)
-        self.power_pin_reverse = OutputDevice(27, initial_value=False)
-        self.pwm_power = PWMOutputDevice(18, frequency=1000, initial_value=0)
-        self.pwm_steering = PWMOutputDevice(12)
+        try:
+            self.power_pin_forward = OutputDevice(17, initial_value=False)
+            self.power_pin_reverse = OutputDevice(27, initial_value=False)
+            self.pwm_power = PWMOutputDevice(18, frequency=1000, initial_value=0)
+            self.pwm_steering = PWMOutputDevice(12)
+        except Exception as e:
+            print(f"Failed to initialize GPIO devices: {e}")
+            self.cleanup()
+    def is_initialized(self):
+        return (
+            self.pwm_power and not self.pwm_power.closed and
+            self.pwm_steering and not self.pwm_steering.closed
+        )
 
     def set_power(self, val):
+        if not self.is_initialized():
+            print("MotorControl is not initialized or has been cleaned up.")
+            return
         try:
             val = float(val)
             if val > 0:  # Reverse
@@ -33,6 +44,9 @@ class MotorControl:
             print("Invalid power value. Must be a number.")
 
     def set_steering_pwm(self, value):
+        if not self.is_initialized():
+            print("MotorControl is not initialized or has been cleaned up.")
+            return
         try:
             value = float(value)
             if 0.0 <= value <= 1.0:
