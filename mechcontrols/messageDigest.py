@@ -10,6 +10,7 @@ pwm_power = PWMOutputDevice(18, frequency=1000, initial_value=0)  # PWM pin for 
 pwm_steering = PWMOutputDevice(12)  # PWM pin for steering control
 
 def messageHandler(message):
+    print("RECIEVED INTO MECH CONTROLS")
     try:
         if isinstance(message, str):
             message = json.loads(message)
