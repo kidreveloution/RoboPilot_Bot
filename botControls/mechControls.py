@@ -2,11 +2,12 @@ from gpiozero import OutputDevice, PWMOutputDevice
 import json
 
 # Motor Control Class
-
 class MotorControl:
     def __init__(self):
         self.close_pwm_devices()
         self.initialized = False  # Initialization status
+        self.current_power = 0  # Cached power value
+        self.current_steering = 0.15  # Cached steering value
         try:
             print("Initializing GPIO devices...")
             self.power_pin_forward = OutputDevice(17, initial_value=False)
@@ -25,8 +26,14 @@ class MotorControl:
         if not self.is_initialized():
             print("MotorControl is not initialized.")
             return
+
         try:
             val = float(val)
+            if val == self.current_power:
+                print(f"Power value unchanged: {val:.2f}")
+                return  # Skip update if the value hasn't changed
+
+            self.current_power = val
             if val > 0:  # Reverse
                 self.power_pin_forward.off()
                 self.power_pin_reverse.on()
@@ -36,8 +43,8 @@ class MotorControl:
             else:  # Stop
                 self.power_pin_forward.off()
                 self.power_pin_reverse.off()
-            print(f"Power PWM set to: {val:.2f}")
             self.pwm_power.value = abs(val) / 100
+            print(f"Power PWM updated to: {val:.2f}")
         except ValueError:
             print("Invalid power value. Must be a number.")
 
@@ -45,15 +52,22 @@ class MotorControl:
         if not self.is_initialized():
             print("MotorControl is not initialized.")
             return
+
         try:
             value = float(value)
+            if value == self.current_steering:
+                print(f"Steering value unchanged: {value:.2f}")
+                return  # Skip update if the value hasn't changed
+
             if 0.0 <= value <= 1.0:
+                self.current_steering = value
                 self.pwm_steering.value = value
-                print(f"Steering PWM set to: {value:.2f}")
+                print(f"Steering PWM updated to: {value:.2f}")
             else:
                 print("Steering value out of range (0.0 - 1.0).")
         except ValueError:
             print("Invalid steering value. Must be a floating-point number.")
+
     # Function to close all PWM output devices
     def close_pwm_devices(self):
         try:
@@ -69,10 +83,8 @@ class MotorControl:
         except Exception as e:
             print(f"Error while closing PWM devices: {e}")
 
-
 # Motor control instance
 motor_control = MotorControl()
-
 
 # Message Handler
 def messageHandler(message):
