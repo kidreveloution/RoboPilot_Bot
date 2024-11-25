@@ -1,7 +1,7 @@
 import mechcontrols.messageDigest
 import modules.zmqHeader as zmqHeader
 import modules.messageBuilder as messageBuilder
-from mechcontrols.messageDigest import power_pin_forward, power_pin_reverse, pwm_power, pwm_steering 
+from mechcontrols.messageDigest import MotorControl
 
 # Create the ZeroMQ connection object
 zmqObj = zmqHeader.ZMQ_CONNECTION(
@@ -12,6 +12,8 @@ zmqObj = zmqHeader.ZMQ_CONNECTION(
 )
 
 try:
+    motor_control = MotorControl()  # Initialize the motor control
+
     # Connect to the ZeroMQ server
     print(zmqObj.connectZMQ())
     
