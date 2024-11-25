@@ -20,14 +20,13 @@ class MotorControl:
             print("GPIO devices initialized successfully.")
         except Exception as e:
             print(f"Failed to initialize GPIO devices: {e}")
-            self.cleanup()
 
     def is_initialized(self):
         return self.initialized
 
     def set_power(self, val):
         if not self.is_initialized():
-            print("MotorControl is not initialized or has been cleaned up.")
+            print("MotorControl is not initialized.")
             return
         try:
             val = float(val)
@@ -47,7 +46,7 @@ class MotorControl:
 
     def set_steering_pwm(self, value):
         if not self.is_initialized():
-            print("MotorControl is not initialized or has been cleaned up.")
+            print("MotorControl is not initialized.")
             return
         try:
             value = float(value)
@@ -59,22 +58,6 @@ class MotorControl:
         except ValueError:
             print("Invalid steering value. Must be a floating-point number.")
 
-    def cleanup(self):
-        if not self.initialized:
-            print("Cleanup skipped because devices were not initialized.")
-            return
-        print("Cleanup called.")
-        if self.pwm_power and not self.pwm_power.closed:
-            self.pwm_power.close()
-        if self.pwm_steering and not self.pwm_steering.closed:
-            self.pwm_steering.close()
-        if self.power_pin_forward and not self.power_pin_forward.closed:
-            self.power_pin_forward.close()
-        if self.power_pin_reverse and not self.power_pin_reverse.closed:
-            self.power_pin_reverse.close()
-        self.initialized = False
-        print("GPIO cleanup completed.")
-
 
 # Motor control instance
 motor_control = MotorControl()
@@ -83,11 +66,23 @@ motor_control = MotorControl()
 # Message Handler
 def messageHandler(message):
     try:
+        if not message:
+            print("Received an empty message.")
+            return  # Ignore empty messages
+
         if isinstance(message, str):
-            message = json.loads(message)
+            try:
+                message = json.loads(message)
+            except json.JSONDecodeError as e:
+                print(f"Invalid JSON received: {message}. Error: {e}")
+                return  # Ignore invalid JSON messages
 
         command = message.get("msg_name")
         value = message.get("content")
+
+        if not command or value is None:
+            print(f"Message missing required fields: {message}")
+            return
 
         if command == "power":
             motor_control.set_power(value)
@@ -96,7 +91,6 @@ def messageHandler(message):
 
     except Exception as e:
         print(f"Error in message handler: {e}")
-        motor_control.cleanup()
 
 
 # ZeroMQ Connection Class
@@ -203,4 +197,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("Shutting down...")
         zmqObj.close()
-        motor_control.cleanup()
