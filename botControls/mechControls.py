@@ -55,7 +55,7 @@ class MotorControl:
         except ValueError:
             print("Invalid steering value. Must be a floating-point number.")
     # Function to close all PWM output devices
-    def close_pwm_devices():
+    def close_pwm_devices(self):
         try:
             if motor_control.is_initialized():
                 print("Closing PWM devices...")
