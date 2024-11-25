@@ -39,7 +39,7 @@ class MotorControl:
             else:  # Stop
                 self.power_pin_forward.off()
                 self.power_pin_reverse.off()
-            
+            print(f"Power PWM set to: {val:.2f}")
             self.pwm_power.value = abs(val) / 100
         except ValueError:
             print("Invalid power value. Must be a number.")
