@@ -18,7 +18,7 @@ start_scripts() {
     echo "Started script1.py in a new screen session."
 
     # Start the second script in a new screen session
-    screen -dmS script2_session bash -c "python3 /home/shahin/RoboPilot_Bot/main.py; exec bash"
+    screen -dmS script2_session bash -c "python3 /home/shahin/RoboPilot_Bot/newMain.py; exec bash"
     echo "Started script2.py in a new screen session."
 
     # List all active screens
