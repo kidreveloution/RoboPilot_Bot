@@ -1,8 +1,10 @@
 import json
-from gpiozero import OutputDevice, PWMOutputDevice
+from gpiozero import OutputDevice, PWMOutputDevice, Device
 import RPi.GPIO as GPIO
 
+
 GPIO.cleanup() 
+Device.close() 
 # GPIO pin setup
 power_pin_forward = OutputDevice(17, initial_value=False)  # Direction pin 1 for forward
 power_pin_reverse = OutputDevice(27, initial_value=False)  # Direction pin 2 for reverse
