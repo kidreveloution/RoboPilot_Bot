@@ -12,7 +12,7 @@ zmqObj = zmqHeader.ZMQ_CONNECTION(
 )
 
 try:
-    motor_control = MotorControl()  # Initialize the motor control
+    #motor_control = MotorControl()  # Initialize the motor control
 
     # Connect to the ZeroMQ server
     print(zmqObj.connectZMQ())
