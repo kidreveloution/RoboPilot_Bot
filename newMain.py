@@ -186,6 +186,8 @@ if __name__ == "__main__":
         message_handler=messageHandler,
     )
 
+    zmqObj.setsockopt(zmq.RCVHWM, 10)  # Limit the receive queue
+
     try:
         if zmqObj.connectZMQ():
             zmqObj.startListenThread()
