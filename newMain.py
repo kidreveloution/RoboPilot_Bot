@@ -1,42 +1,47 @@
 import json
+import threading
+import requests
+import zmq
 from gpiozero import OutputDevice, PWMOutputDevice
+import modules.messageBuilder as messageBuilder
 
+
+# Motor Control Class
 class MotorControl:
     def __init__(self):
         # GPIO pin setup
-        self.power_pin_forward = OutputDevice(17, initial_value=False)  # Direction pin 1 for forward
-        self.power_pin_reverse = OutputDevice(27, initial_value=False)  # Direction pin 2 for reverse
-        self.pwm_power = PWMOutputDevice(18, frequency=1000, initial_value=0)  # PWM pin for power control
-        self.pwm_steering = PWMOutputDevice(12)  # PWM pin for steering control
+        self.power_pin_forward = OutputDevice(17, initial_value=False)
+        self.power_pin_reverse = OutputDevice(27, initial_value=False)
+        self.pwm_power = PWMOutputDevice(18, frequency=1000, initial_value=0)
+        self.pwm_steering = PWMOutputDevice(12)
 
     def set_power(self, val):
-        val = float(val)
-        if val > 0:
-            # Reverse
-            self.power_pin_forward.off()
-            self.power_pin_reverse.on()
+        try:
+            val = float(val)
+            if val > 0:  # Reverse
+                self.power_pin_forward.off()
+                self.power_pin_reverse.on()
+            elif val < 0:  # Forward
+                self.power_pin_forward.on()
+                self.power_pin_reverse.off()
+            else:  # Stop
+                self.power_pin_forward.off()
+                self.power_pin_reverse.off()
+            
             self.pwm_power.value = abs(val) / 100
-        elif val < 0:
-            # Forward
-            self.power_pin_forward.on()
-            self.power_pin_reverse.off()
-            self.pwm_power.value = abs(val) / 100
-        else:
-            # Stop
-            self.power_pin_forward.off()
-            self.power_pin_reverse.off()
-            self.pwm_power.value = 0
+        except ValueError:
+            print("Invalid power value. Must be a number.")
 
     def set_steering_pwm(self, value):
         try:
             value = float(value)
             if 0.0 <= value <= 1.0:
                 self.pwm_steering.value = value
-                print(f"Steering PWM value set to: {value:.2f}")
+                print(f"Steering PWM set to: {value:.2f}")
             else:
-                print("Steering value out of range. Please enter a number between 0.0 and 1.0.")
+                print("Steering value out of range (0.0 - 1.0).")
         except ValueError:
-            print("Please enter a valid floating-point number for steering.")
+            print("Invalid steering value. Must be a floating-point number.")
 
     def cleanup(self):
         self.pwm_power.close()
@@ -44,160 +49,132 @@ class MotorControl:
         self.power_pin_forward.close()
         self.power_pin_reverse.close()
 
-# Initialize the MotorControl instance on import
+
+# Motor control instance
 motor_control = MotorControl()
 
+
+# Message Handler
 def messageHandler(message):
-    print("RECEIVED INTO MECH CONTROLS")
     try:
         if isinstance(message, str):
             message = json.loads(message)
 
-        print(message)
+        command = message.get("msg_name")
+        value = message.get("content")
 
-        command = str(message["msg_name"])
-        val = str(message["content"])
-
-        print(command, val)
         if command == "power":
-            motor_control.set_power(val)
+            motor_control.set_power(value)
         elif command == "steering":
-            motor_control.set_steering_pwm(val)
-
-    except KeyboardInterrupt:
-        print("Stopping motor and cleaning up GPIO")
-        motor_control.cleanup()
+            motor_control.set_steering_pwm(value)
 
     except Exception as e:
-        print("An error occurred:", str(e))
+        print(f"Error in message handler: {e}")
         motor_control.cleanup()
 
 
-import zmq
-import sys
-import os
-import logging
-import requests
-import json
-import threading
-import modules.messageBuilder as messageBuilder
-
+# ZeroMQ Connection Class
 class ZMQ_CONNECTION:
-    def __init__(self, TX_ID: str, RX_ID: str, SERVER_IP: str, message_handler=None) -> None:
+    def __init__(self, TX_ID, RX_ID, SERVER_IP, message_handler=None):
+        if not TX_ID or not RX_ID or not SERVER_IP:
+            raise ValueError("TX_ID, RX_ID, and SERVER_IP are required.")
+
         self.TX_ID = TX_ID
         self.RX_ID = RX_ID
         self.SERVER_IP = SERVER_IP
         self.context = zmq.Context()
-        self.dealer = None
+        self.dealer = self.context.socket(zmq.DEALER)
+        self.dealer.setsockopt(zmq.IDENTITY, self.TX_ID.encode('utf-8'))
         self.message_handler = message_handler
-        self.running = False  # Initialize the running flag
-        
-        if not TX_ID or not RX_ID or not SERVER_IP:
-            raise ValueError("TX_ID, RX_ID, and SERVER_IP must be provided.")
-    
-    def get_public_ip(self) -> str:
+        self.running = False
+
+    def get_public_ip(self):
         try:
             response = requests.get('https://api.ipify.org')
-            response.raise_for_status()  # Raises an error for bad responses
+            response.raise_for_status()
             return response.text
         except requests.RequestException as e:
-            print(f"Failed to get public IP: {e}")
-            return "0.0.0.0"  # Return a default IP if the request fails
-    
-    def connectZMQ(self) -> bool:
+            print(f"Failed to fetch public IP: {e}")
+            return "0.0.0.0"
+
+    def registerAtRouter(self):
         try:
-            self.dealer = self.context.socket(zmq.DEALER)
-            self.dealer.setsockopt(zmq.IDENTITY, self.TX_ID.encode('utf-8'))
-            self.dealer.connect(self.SERVER_IP)
-            registration_message = self.registerAtRouter()
-            self.dealer.send_multipart([self.TX_ID.encode('utf-8'), registration_message.encode('utf-8')])
-            print("Connected and registration message sent.")
-            return True
-        except Exception as e:
-            print(f"Failed to connect or send registration: {e}")
-            return False
-    
-    def registerAtRouter(self) -> str:
-        try:
-            initial_message = messageBuilder.MESSAGE_CLASS(
+            return messageBuilder.MESSAGE_CLASS(
                 tx_id=self.TX_ID,
                 msg_name="register",
                 rx_id=self.RX_ID,
                 content={"ip_address": self.get_public_ip()}
             ).buildMessage()
-            return initial_message
         except Exception as e:
-            print(f"Failed to build registration message: {e}")
+            print(f"Error building registration message: {e}")
             return ""
 
+    def connectZMQ(self):
+        try:
+            self.dealer.connect(self.SERVER_IP)
+            registration_message = self.registerAtRouter()
+            self.dealer.send_multipart([self.TX_ID.encode('utf-8'), registration_message.encode('utf-8')])
+            print("Connected to ZeroMQ server.")
+            return True
+        except Exception as e:
+            print(f"Connection error: {e}")
+            return False
+
     def listen(self):
-        """Listens for incoming messages from the ROUTER socket."""
         try:
             while self.running:
-                # Wait for incoming messages
                 message = self.dealer.recv_multipart()
-                if message:
-                    print(f"Received message: {message}")
-                    if self.message_handler:
-                        self.message_handler(message[0].decode('utf-8'))  # Call the external handler
-                        print(f"Sent to external Handler: {message[0].decode('utf-8')}")
-
+                if message and self.message_handler:
+                    self.message_handler(message[0].decode('utf-8'))
         except Exception as e:
             print(f"Error while listening: {e}")
-    
+
     def sendMessage(self, RX_ID, msg_name, content):
-        if isinstance(content, str):
-            content = json.loads(content)
-        msg = messageBuilder.MESSAGE_CLASS(
-            tx_id=self.TX_ID,
-            msg_name=msg_name,
-            rx_id=RX_ID,
-            content=content
-        ).buildMessage()
-        self.dealer.send_multipart([self.TX_ID.encode('utf-8'), msg.encode('utf-8')])
+        try:
+            if isinstance(content, str):
+                content = json.loads(content)
+            msg = messageBuilder.MESSAGE_CLASS(
+                tx_id=self.TX_ID,
+                msg_name=msg_name,
+                rx_id=RX_ID,
+                content=content
+            ).buildMessage()
+            self.dealer.send_multipart([self.TX_ID.encode('utf-8'), msg.encode('utf-8')])
+        except Exception as e:
+            print(f"Error sending message: {e}")
 
     def startListenThread(self):
         self.running = True
-        self.listenThread = threading.Thread(target=self.listen)
-        self.listenThread.start()
-    
+        threading.Thread(target=self.listen, daemon=True).start()
+
     def stopListenThread(self):
         self.running = False
-        if self.listenThread.is_alive():
-            self.listenThread.join()
-    
+
     def close(self):
         self.stopListenThread()
-        if self.dealer:
-            self.dealer.close()
+        self.dealer.close()
         self.context.term()
         print("ZMQ connection closed.")
 
-# Create the ZeroMQ connection object
-zmqObj = ZMQ_CONNECTION(
-    TX_ID="RoboCar_1",
-    RX_ID="ROUTER",
-    SERVER_IP="tcp://3.22.90.156:5555",
-    message_handler=messageHandler,
-)
 
-try:
-    #motor_control = MotorControl()  # Initialize the motor control
+# Main Script
+if __name__ == "__main__":
+    zmqObj = ZMQ_CONNECTION(
+        TX_ID="RoboCar_1",
+        RX_ID="ROUTER",
+        SERVER_IP="tcp://3.22.90.156:5555",
+        message_handler=messageHandler,
+    )
 
-    # Connect to the ZeroMQ server
-    print(zmqObj.connectZMQ())
-    
-    # Start the listening thread
-    print(zmqObj.startListenThread())
+    try:
+        if zmqObj.connectZMQ():
+            zmqObj.startListenThread()
+            print("Listening for messages...")
 
-    # Keep the main thread alive so that the listener can run
-    while True:
-        pass
-
-except KeyboardInterrupt:
-    print("KeyboardInterrupt received, closing ZeroMQ connection...")
-    
-    # Close the ZeroMQ socket and context gracefully
-    zmqObj.close()  # You may need to implement this method in your ZMQ_CONNECTION class to handle graceful shutdown
-
-    print("ZeroMQ connection closed.")
+            # Keep the main thread alive
+            while True:
+                pass
+    except KeyboardInterrupt:
+        print("Shutting down...")
+        zmqObj.close()
+        motor_control.cleanup()
