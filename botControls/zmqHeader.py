@@ -15,6 +15,8 @@ class ZMQ_CONNECTION:
         self.context = zmq.Context()
         self.dealer = self.context.socket(zmq.DEALER)
         self.dealer.setsockopt(zmq.IDENTITY, self.TX_ID.encode('utf-8'))
+        self.dealer.setsockopt(zmq.RCVHWM, 10)  # Limit the receive queue
+
         self.message_handler = message_handler
         self.running = False
 
