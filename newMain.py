@@ -9,19 +9,21 @@ import modules.messageBuilder as messageBuilder
 # Motor Control Class
 class MotorControl:
     def __init__(self):
+        self.initialized = False  # Initialization status
         try:
+            print("Initializing GPIO devices...")
             self.power_pin_forward = OutputDevice(17, initial_value=False)
             self.power_pin_reverse = OutputDevice(27, initial_value=False)
             self.pwm_power = PWMOutputDevice(18, frequency=1000, initial_value=0)
             self.pwm_steering = PWMOutputDevice(12)
+            self.initialized = True  # Mark initialization as successful
+            print("GPIO devices initialized successfully.")
         except Exception as e:
             print(f"Failed to initialize GPIO devices: {e}")
             self.cleanup()
+
     def is_initialized(self):
-        return (
-            self.pwm_power and not self.pwm_power.closed and
-            self.pwm_steering and not self.pwm_steering.closed
-        )
+        return self.initialized
 
     def set_power(self, val):
         if not self.is_initialized():
@@ -58,10 +60,20 @@ class MotorControl:
             print("Invalid steering value. Must be a floating-point number.")
 
     def cleanup(self):
-        self.pwm_power.close()
-        self.pwm_steering.close()
-        self.power_pin_forward.close()
-        self.power_pin_reverse.close()
+        if not self.initialized:
+            print("Cleanup skipped because devices were not initialized.")
+            return
+        print("Cleanup called.")
+        if self.pwm_power and not self.pwm_power.closed:
+            self.pwm_power.close()
+        if self.pwm_steering and not self.pwm_steering.closed:
+            self.pwm_steering.close()
+        if self.power_pin_forward and not self.power_pin_forward.closed:
+            self.power_pin_forward.close()
+        if self.power_pin_reverse and not self.power_pin_reverse.closed:
+            self.power_pin_reverse.close()
+        self.initialized = False
+        print("GPIO cleanup completed.")
 
 
 # Motor control instance
