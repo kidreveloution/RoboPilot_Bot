@@ -1,6 +1,7 @@
 import mechcontrols.messageDigest
 import modules.zmqHeader as zmqHeader
 import modules.messageBuilder as messageBuilder
+import mechcontrols.messageDigest
 
 # Create the ZeroMQ connection object
 zmqObj = zmqHeader.ZMQ_CONNECTION(
